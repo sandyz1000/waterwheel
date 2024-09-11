@@ -5,7 +5,7 @@ use crate::{
 };
 use anyhow::Result;
 use futures::TryStreamExt;
-use highnoon::StatusCode;
+
 use lapin::{
     options::{
         BasicAckOptions, BasicConsumeOptions, ExchangeDeclareOptions, QueueBindOptions,
@@ -107,12 +107,12 @@ async fn fetch_task_def(
 
     match res {
         Ok(resp) => match resp.status() {
-            StatusCode::OK => {
+            reqwest::StatusCode::OK => {
                 let def = resp.json().await?;
                 trace!(?task_id, "got task def");
                 Ok(Some(def))
             }
-            StatusCode::NOT_FOUND => {
+            reqwest::StatusCode::NOT_FOUND => {
                 warn!(?task_id, "task def not found");
                 Ok(None)
             }
@@ -134,7 +134,7 @@ async fn fetch_task_def(
     }
 }
 
-pub async fn process_updates(worker: Arc<Worker>) -> Result<!> {
+pub async fn process_updates(worker: Arc<Worker>) -> Result<()> {
     let chan = worker.amqp_conn.create_channel().await?;
 
     // declare exchange for config updates

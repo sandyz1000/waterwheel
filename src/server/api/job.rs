@@ -72,7 +72,8 @@ pub async fn create(mut req: Request<State>) -> highnoon::Result<Response> {
     let project_id = get_project_id(&pool, &job.project).await?;
     auth::update().job(job.uuid, project_id).check(&req).await?;
 
-    let mut txn = pool.begin().await?;
+    let mut transaction = pool.begin().await?;
+    let txn = &mut transaction;
 
     let query = sqlx::query(
         "INSERT INTO job(
@@ -98,7 +99,7 @@ pub async fn create(mut req: Request<State>) -> highnoon::Result<Response> {
         .bind(&job.description)
         .bind(job.paused)
         .bind(serde_json::to_string(&job)?)
-        .execute(&mut txn)
+        .execute(&mut **txn)
         .await;
 
     match pg_error(res)? {
@@ -120,20 +121,20 @@ pub async fn create(mut req: Request<State>) -> highnoon::Result<Response> {
 
     // insert the triggers
     for trigger in &job.triggers {
-        let id = triggers::create_trigger(&mut txn, &job, trigger).await?;
+        let id = triggers::create_trigger(txn, &job, trigger).await?;
         triggers_to_tx.push(id);
     }
 
     for task in &job.tasks {
-        let id = tasks::create_task(&mut txn, task, &job).await?;
+        let id = tasks::create_task(txn, task, &job).await?;
         tasks_to_tx.push(id);
     }
 
     for task in &job.tasks {
-        tasks::create_task_edges(&mut txn, task, &job).await?;
+        tasks::create_task_edges(txn, task, &job).await?;
     }
 
-    txn.commit().await?;
+    transaction.commit().await?;
 
     updates::send_trigger_update(req.get_channel(), TriggerUpdate(triggers_to_tx)).await?;
 

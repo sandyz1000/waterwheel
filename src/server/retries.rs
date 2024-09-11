@@ -26,7 +26,7 @@ pub struct Retry {
     pub task_run_id: Uuid,
 }
 
-pub async fn process_retries(server: Arc<Server>) -> Result<!> {
+pub async fn process_retries(server: Arc<Server>) -> Result<()> {
     let mut retry_rx = server.post_office.receive_mail::<SubmitRetry>().await?;
 
     let mut queue = BinaryHeap::new_min();
@@ -160,7 +160,7 @@ async fn reload_retries(server: &Server, queue: &mut RetryQueue) -> Result<()> {
 }
 
 
-pub async fn retry_cluster_changes(server: Arc<Server>) -> Result<!> {
+pub async fn retry_cluster_changes(server: Arc<Server>) -> Result<()> {
     let mut cluster_rx = server.on_cluster_membership_change.subscribe();
         //server.post_office.receive_mail::<ClusterMembershipChange>().await?;
     let mut retry_tx = server.post_office.post_mail::<SubmitRetry>().await?;

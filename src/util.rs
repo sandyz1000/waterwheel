@@ -39,7 +39,7 @@ pub fn format_duration_approx(duration: Duration) -> String {
 pub fn spawn_retry<F, C, Fut>(name: impl Into<String>, ctx: C, func: F)
 where
     F: Fn(C) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Result<!>> + Send + 'static,
+    Fut: Future<Output = Result<()>> + Send + 'static,
     C: Clone + Send + Sync + 'static,
 {
     let name = name.into();
@@ -71,7 +71,7 @@ where
 pub fn spawn_or_crash<F, C, Fut>(name: impl Into<String>, ctx: C, func: F)
 where
     F: Fn(C) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Result<!>> + Send + 'static,
+    Fut: Future<Output = Result<()>> + Send + 'static,
     C: Send + Sync + 'static,
 {
     let name = name.into();
@@ -84,6 +84,7 @@ where
         error!("task {} failed, aborting!", name);
         std::process::exit(1);
     });
+
 }
 
 /// Extracts the first element from a 1-tuple

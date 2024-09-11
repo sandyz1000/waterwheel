@@ -11,7 +11,7 @@ use tracing::{debug, trace};
 
 fn get_as_string(value: &redis::Value) -> highnoon::Result<String> {
     match value {
-        redis::Value::Data(raw) => Ok(String::from_utf8(raw.clone())?),
+        redis::Value::BulkString(raw) => Ok(String::from_utf8(raw.clone())?),
         _ => Err(anyhow::format_err!("data was not binary").into()),
     }
 }

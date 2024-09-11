@@ -28,7 +28,7 @@ pub struct ExecuteToken {
     pub attempt: u32,
 }
 
-pub async fn process_executions(server: Arc<Server>) -> Result<!> {
+pub async fn process_executions(server: Arc<Server>) -> Result<()> {
     let pool = server.db_pool.clone();
     let statsd = server.statsd.clone();
 
@@ -88,8 +88,8 @@ pub async fn process_executions(server: Arc<Server>) -> Result<!> {
             "enqueueing");
 
         let mut conn = pool.acquire().await?;
-        let mut txn = conn.begin().await?;
-
+        let mut transaction = conn.begin().await?;
+        let txn = &mut transaction;
         let task_req = TaskRequest {
             task_run_id: Uuid::new_v4(),
             task_id: token.task_id,
@@ -118,9 +118,9 @@ pub async fn process_executions(server: Arc<Server>) -> Result<!> {
         )
         .bind(token.task_id)
         .bind(token.trigger_datetime)
-        .execute(&mut txn)
+        .execute(&mut **txn)
         .await?;
-
+        
         sqlx::query(
             "INSERT INTO task_run(id, task_id, trigger_datetime,
                 queued_datetime, started_datetime, finish_datetime,
@@ -137,10 +137,10 @@ pub async fn process_executions(server: Arc<Server>) -> Result<!> {
         .bind(Utc::now())
         .bind(priority)
         .bind(attempt as i64)
-        .execute(&mut txn)
+        .execute(&mut **txn)
         .await?;
 
-        txn.commit().await?;
+        transaction.commit().await?;
 
         info!(task_id=?token.task_id,
             trigger_datetime=%token.trigger_datetime.to_rfc3339(),
@@ -154,5 +154,5 @@ pub async fn process_executions(server: Arc<Server>) -> Result<!> {
             .send();
     }
 
-    unreachable!("ExecuteToken channel was closed!")
+    anyhow::bail!("ExecuteToken channel was closed!")
 }

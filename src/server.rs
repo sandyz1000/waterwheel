@@ -68,7 +68,7 @@ impl Server {
         }))
     }
 
-    pub async fn run_scheduler(self: Arc<Self>) -> Result<!> {
+    pub async fn run_scheduler(self: Arc<Self>) -> Result<()> {
         spawn_or_crash("heartbeat", self.clone(), heartbeat::heartbeat);
         spawn_or_crash("triggers", self.clone(), triggers::process_triggers);
         spawn_or_crash("tokens", self.clone(), tokens::process_tokens);

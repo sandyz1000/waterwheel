@@ -52,7 +52,7 @@ pub async fn post_heartbeat(config: &Config, client: &reqwest::Client) -> Result
     }
 }
 
-pub async fn heartbeat(worker: Arc<Worker>) -> Result<!> {
+pub async fn heartbeat(worker: Arc<Worker>) -> Result<()> {
     let client = reqwest::Client::new();
 
     loop {

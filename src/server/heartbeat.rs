@@ -39,7 +39,7 @@ pub async fn post_heartbeat(server: &Server, pool: &PgPool) -> Result<()> {
     Ok(())
 }
 
-pub async fn heartbeat(server: Arc<Server>) -> Result<!> {
+pub async fn heartbeat(server: Arc<Server>) -> Result<()> {
     let pool = server.db_pool.clone();
 
     loop {

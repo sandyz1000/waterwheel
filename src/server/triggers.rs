@@ -87,7 +87,7 @@ impl Trigger {
     }
 }
 
-pub async fn process_triggers(server: Arc<Server>) -> Result<!> {
+pub async fn process_triggers(server: Arc<Server>) -> Result<()> {
     let mut trigger_rx = server.post_office.receive_mail::<TriggerChange>().await?;
     let mut queue = Queue::new_min();
 
@@ -252,7 +252,7 @@ async fn do_activate_trigger(
     )
     .bind(trigger_time.trigger_id)
     .bind(trigger_time.trigger_datetime)
-    .execute(txn)
+    .execute(&mut **txn)
     .await?;
 
     Ok(tokens_to_tx)
@@ -471,7 +471,7 @@ async fn requeue_next_triggertime(
     Ok(())
 }
 
-pub async fn trigger_cluster_changes(server: Arc<Server>) -> Result<!> {
+pub async fn trigger_cluster_changes(server: Arc<Server>) -> Result<()> {
     let mut cluster_rx = server.on_cluster_membership_change.subscribe();
     let mut change_tx = server.post_office.post_mail::<TriggerChange>().await?;
     let mut current_triggers = HashSet::new();

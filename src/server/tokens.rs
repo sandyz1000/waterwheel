@@ -48,7 +48,7 @@ async fn get_count_and_threshold(pool: &PgPool, token: &Token) -> Result<Increme
     Ok(info)
 }
 
-pub async fn process_tokens(server: Arc<Server>) -> Result<!> {
+pub async fn process_tokens(server: Arc<Server>) -> Result<()> {
     let pool = server.db_pool.clone();
 
     restore_tokens(&server, None).await?;
@@ -115,7 +115,7 @@ pub async fn increment_token(txn: &mut Transaction<'_, Postgres>, token: &Token)
     )
     .bind(token.task_id)
     .bind(token.trigger_datetime)
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .await?;
 
     Ok(())

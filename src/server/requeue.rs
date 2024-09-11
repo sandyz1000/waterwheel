@@ -20,7 +20,7 @@ struct Requeue {
     paused: bool,
 }
 
-pub async fn process_requeue(server: Arc<Server>) -> Result<!> {
+pub async fn process_requeue(server: Arc<Server>) -> Result<()> {
     let mut execute_tx = server.post_office.post_mail::<ExecuteToken>().await?;
 
     let timeout: PgInterval = (Duration::from_secs(server.config.task_heartbeat)
@@ -37,7 +37,8 @@ pub async fn process_requeue(server: Arc<Server>) -> Result<!> {
         ticker.tick().await;
         debug!("checking for tasks to requeue");
 
-        let mut txn = server.db_pool.begin().await?;
+        let mut transaction = server.db_pool.begin().await?;
+        let txn = &mut transaction;
 
         let requeues = sqlx::query_as::<_, Requeue>(
             "SELECT
@@ -61,7 +62,7 @@ pub async fn process_requeue(server: Arc<Server>) -> Result<!> {
         .bind(TokenState::Running)
         .bind(TokenState::Cancelled)
         .bind(&timeout)
-        .fetch_all(&mut txn)
+        .fetch_all(&mut **txn)
         .await?;
 
         for requeue in requeues {
@@ -96,7 +97,7 @@ pub async fn process_requeue(server: Arc<Server>) -> Result<!> {
             )
             .bind(TokenState::Error)
             .bind(requeue.task_run_id)
-            .execute(&mut txn)
+            .execute(&mut **txn)
             .await?;
 
             sqlx::query(
@@ -108,12 +109,12 @@ pub async fn process_requeue(server: Arc<Server>) -> Result<!> {
             .bind(TokenState::Error)
             .bind(requeue.task_id)
             .bind(requeue.trigger_datetime)
-            .execute(&mut txn)
+            .execute(&mut **txn)
             .await?;
         }
 
-        txn.commit().await?;
+        transaction.commit().await?;
 
-        debug!("done checking for tasks to requeue");
+        anyhow::bail!("done checking for tasks to requeue");
     }
 }

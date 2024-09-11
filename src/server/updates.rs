@@ -16,7 +16,7 @@ pub const TRIGGER_UPDATES_EXCHANGE: &str = "waterwheel.updates.triggers";
 pub const TOKEN_UPDATES_EXCHANGE: &str = "waterwheel.updates.tokens";
 pub const TOKEN_UPDATES_QUEUE: &str = "waterwheel.updates.tokens";
 
-pub async fn process_token_updates(server: Arc<Server>) -> Result<!> {
+pub async fn process_token_updates(server: Arc<Server>) -> Result<()> {
     let chan = server.amqp_conn.create_channel().await?;
 
     let mut token_tx = server.post_office.post_mail::<ProcessToken>().await?;
@@ -62,7 +62,7 @@ pub async fn process_token_updates(server: Arc<Server>) -> Result<!> {
     unreachable!("consumer stopped consuming")
 }
 
-pub async fn process_trigger_updates(server: Arc<Server>) -> Result<!> {
+pub async fn process_trigger_updates(server: Arc<Server>) -> Result<()> {
     let chan = server.amqp_conn.create_channel().await?;
 
     // declare queue for consuming incoming messages

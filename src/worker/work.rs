@@ -93,7 +93,7 @@ pub async fn create_consumer(chan: &Channel) -> Result<Consumer> {
     Ok(consumer)
 }
 
-pub async fn process_work(worker: Arc<Worker>) -> Result<!> {
+pub async fn process_work(worker: Arc<Worker>) -> Result<()> {
     let statsd = worker.statsd.clone();
 
     let engine = worker.config.task_engine.get_impl()?;

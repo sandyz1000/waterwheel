@@ -20,7 +20,7 @@ use crate::server::retries::{Retry, SubmitRetry};
 
 const RESULT_QUEUE: &str = "waterwheel.results";
 
-pub async fn process_progress(server: Arc<Server>) -> Result<!> {
+pub async fn process_progress(server: Arc<Server>) -> Result<()> {
     let pool = server.db_pool.clone();
     let chan = server.amqp_conn.create_channel().await?;
 
@@ -88,7 +88,7 @@ pub async fn process_progress(server: Arc<Server>) -> Result<!> {
         }
     }
 
-    unreachable!("consumer stopped consuming")
+    anyhow::bail!("consumer stopped consuming")
 }
 
 #[derive(sqlx::FromRow)]
@@ -156,7 +156,7 @@ async fn update_task_progress(
     .bind(task_progress.result)
     .bind(task_progress.task_id)
     .bind(task_progress.trigger_datetime)
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .await?;
 
     trace!(task_id=?task_progress.task_id,
@@ -178,7 +178,7 @@ async fn update_task_progress(
     .bind(task_progress.finished_datetime)
     .bind(task_progress.worker_id)
     .bind(task_progress.task_run_id)
-    .fetch_optional(&mut *txn)
+    .fetch_optional(&mut **txn)
     .await?;
 
     // there are cases when the database doesn't record a task run for this UUID
@@ -224,7 +224,7 @@ async fn submit_retry(
     .bind(task_progress.task_run_id)
     .bind(task_progress.finished_datetime.unwrap())
     .bind(server.config.default_task_retry_delay as i64)
-    .fetch_one(&mut *txn)
+    .fetch_one(&mut **txn)
     .await?;
 
     info!(task_id=?task_progress.task_id,
@@ -240,7 +240,7 @@ async fn submit_retry(
     )
     .bind(task_progress.task_run_id)
     .bind(retry_at_datetime)
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .await?;
 
     sqlx::query(
@@ -252,7 +252,7 @@ async fn submit_retry(
     .bind(TokenState::Retry)
     .bind(task_progress.task_id)
     .bind(task_progress.trigger_datetime)
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .await?;
 
     let mut retry_tx = post_office.post_mail::<SubmitRetry>().await?;

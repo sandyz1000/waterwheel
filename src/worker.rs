@@ -70,7 +70,7 @@ impl Worker {
         })
     }
 
-    pub async fn run_worker(self) -> Result<!> {
+    pub async fn run_worker(self) -> Result<()> {
         heartbeat::wait_for_server(&self.config).await;
 
         let this = Arc::new(self);
