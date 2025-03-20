@@ -79,7 +79,7 @@ pub async fn create_task(
     .bind(task.docker.as_ref().map(|d| &d.image))
     .bind(task.docker.as_ref().map(|d| &d.args))
     .bind(task.docker.as_ref().map(|d| &d.env))
-    .fetch_one(&mut **txn)
+    .fetch_one(txn.as_mut())
     .await?;
 
     Ok(task_id)
@@ -98,7 +98,11 @@ pub async fn create_task_edges(
     )
     .bind(job.uuid)
     .bind(&task.name)
+<<<<<<< HEAD
     .fetch_one(&mut **txn)
+=======
+    .fetch_one(txn.as_mut())
+>>>>>>> fc1f13a2e21342e44acd5dfcc2781a96a82151ef
     .await?;
 
     // remove existing edges
@@ -107,7 +111,11 @@ pub async fn create_task_edges(
         WHERE task_id = $1",
     )
     .bind(task_id)
+<<<<<<< HEAD
     .execute(&mut **txn)
+=======
+    .execute(txn.as_mut())
+>>>>>>> fc1f13a2e21342e44acd5dfcc2781a96a82151ef
     .await?;
 
     sqlx::query(
@@ -115,7 +123,11 @@ pub async fn create_task_edges(
         WHERE child_task_id = $1",
     )
     .bind(task_id)
+<<<<<<< HEAD
     .execute(&mut **txn)
+=======
+    .execute(txn.as_mut())
+>>>>>>> fc1f13a2e21342e44acd5dfcc2781a96a82151ef
     .await?;
 
     if let Some(depends) = &task.depends {
@@ -183,7 +195,11 @@ async fn create_trigger_edge(
     .bind(&reference.name)
     .bind(task)
     .bind(reference.offset.map(|offset| offset.num_seconds()))
+<<<<<<< HEAD
     .execute(&mut **txn)
+=======
+    .execute(txn.as_mut())
+>>>>>>> fc1f13a2e21342e44acd5dfcc2781a96a82151ef
     .await;
 
     if let Err(e) = pg_error(res)? {
@@ -232,7 +248,11 @@ async fn create_task_edge(
     .bind(task)
     .bind(kind)
     .bind(reference.offset.map(|offset| offset.num_seconds()))
+<<<<<<< HEAD
     .execute(&mut **txn)
+=======
+    .execute(txn.as_mut())
+>>>>>>> fc1f13a2e21342e44acd5dfcc2781a96a82151ef
     .await;
 
     if let Err(e) = pg_error(res)? {
