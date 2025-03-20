@@ -107,12 +107,12 @@ async fn fetch_task_def(
 
     match res {
         Ok(resp) => match resp.status() {
-            reqwest::StatusCode::OK => {
+            StatusCode::OK => {
                 let def = resp.json().await?;
                 trace!(?task_id, "got task def");
                 Ok(Some(def))
             }
-            reqwest::StatusCode::NOT_FOUND => {
+            StatusCode::NOT_FOUND => {
                 warn!(?task_id, "task def not found");
                 Ok(None)
             }
