@@ -5,7 +5,7 @@ version: '3.1'
 
 services:
   amqp:
-    image: rabbitmq:3.12-management-alpine
+    image: rabbitmq:4.1-management-alpine
     #environment:
       #- RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit consumer_timeout 86400000 # 24h
     ports:
@@ -28,6 +28,6 @@ services:
     command: ["run", "--server", "-b", "/policy"]
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     ports:
       - "6379:6379"

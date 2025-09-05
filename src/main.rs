@@ -1,13 +1,17 @@
 use anyhow::Result;
 use waterwheel::{
     config, logging,
-    server::{api, Server},
+    server::{Server, api},
     worker::Worker,
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
+
+    rustls::crypto::aws_lc_rs::default_provider()
+        .install_default()
+        .expect("installing default crypto provider failed");
 
     let app = clap::Command::new("waterwheel")
         .author("Steve Lee <sphen.lee@gmail.com>")
