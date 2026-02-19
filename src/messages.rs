@@ -147,9 +147,11 @@ pub struct TaskProgress {
 #[serde(rename_all = "lowercase")]
 #[sqlx(rename_all = "lowercase")]
 #[sqlx(type_name = "VARCHAR")]
+#[derive(Default)]
 pub enum TaskPriority {
     BackFill = 0,
     Low = 1,
+    #[default]
     Normal = 2,
     High = 3,
 }
@@ -165,11 +167,6 @@ impl TaskPriority {
     }
 }
 
-impl Default for TaskPriority {
-    fn default() -> Self {
-        Self::Normal
-    }
-}
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct WorkerHeartbeat {
