@@ -1,5 +1,4 @@
-// #![feature(never_type)]
-// #![feature(assert_matches)]
+#![feature(never_type)]
 
 mod amqp;
 pub mod circuit_breaker;

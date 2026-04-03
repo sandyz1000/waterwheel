@@ -142,7 +142,7 @@ pub struct TaskProgress {
 // }
 
 #[derive(
-    Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, sqlx::Type,
+    Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize, sqlx::Type, Default,
 )]
 #[serde(rename_all = "lowercase")]
 #[sqlx(rename_all = "lowercase")]
@@ -166,7 +166,6 @@ impl TaskPriority {
         }
     }
 }
-
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct WorkerHeartbeat {
